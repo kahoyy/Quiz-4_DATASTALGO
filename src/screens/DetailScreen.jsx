@@ -10,11 +10,175 @@ function DetailScreen() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const mockProjectsData = {
+        '1': {
+            _id: '1',
+            project_name: 'Website Redesign',
+            project_description: 'Complete redesign of the company website with modern UI/UX',
+            status: 'in-progress',
+            hours_consumed: 120,
+            start_date: '2026-01-15',
+            end_date: '2026-03-15'
+        },
+        '2': {
+            _id: '2',
+            project_name: 'Mobile App Development',
+            project_description: 'Development of iOS and Android mobile applications',
+            status: 'in-progress',
+            hours_consumed: 250,
+            start_date: '2026-01-01',
+            end_date: '2026-04-30'
+        },
+        '3': {
+            _id: '3',
+            project_name: 'Database Migration',
+            project_description: 'Migration from legacy database to modern cloud-based solution',
+            status: 'pending',
+            hours_consumed: 40,
+            start_date: '2026-02-10',
+            end_date: '2026-03-31'
+        },
+        '4': {
+            _id: '4',
+            project_name: 'API Integration',
+            project_description: 'Integrate third-party payment and analytics APIs',
+            status: 'completed',
+            hours_consumed: 80,
+            start_date: '2025-12-01',
+            end_date: '2026-01-31'
+        }
+    };
+
+    const mockTasksData = {
+        '1': [
+            {
+                _id: 't1',
+                task_name: 'UI Design',
+                task_description: 'Design all UI components and pages',
+                status: 'completed',
+                hours_consumed: 40,
+                user_assigned: 'John Designer',
+                start_date: '2026-01-15',
+                end_date: '2026-01-31'
+            },
+            {
+                _id: 't2',
+                task_name: 'Frontend Development',
+                task_description: 'Implement UI components with React',
+                status: 'in-progress',
+                hours_consumed: 60,
+                user_assigned: 'Sarah Frontend Dev',
+                start_date: '2026-02-01',
+                end_date: '2026-02-28'
+            },
+            {
+                _id: 't3',
+                task_name: 'Testing & QA',
+                task_description: 'Perform testing and quality assurance',
+                status: 'pending',
+                hours_consumed: 20,
+                user_assigned: 'Mike QA',
+                start_date: '2026-03-01',
+                end_date: '2026-03-15'
+            }
+        ],
+        '2': [
+            {
+                _id: 't4',
+                task_name: 'iOS Development',
+                task_description: 'Develop iOS application',
+                status: 'in-progress',
+                hours_consumed: 120,
+                user_assigned: 'Alice iOS Dev',
+                start_date: '2026-01-01',
+                end_date: '2026-03-15'
+            },
+            {
+                _id: 't5',
+                task_name: 'Android Development',
+                task_description: 'Develop Android application',
+                status: 'in-progress',
+                hours_consumed: 130,
+                user_assigned: 'Bob Android Dev',
+                start_date: '2026-01-01',
+                end_date: '2026-03-15'
+            }
+        ],
+        '3': [
+            {
+                _id: 't6',
+                task_name: 'Data Analysis',
+                task_description: 'Analyze current database structure',
+                status: 'completed',
+                hours_consumed: 20,
+                user_assigned: 'Charlie DBA',
+                start_date: '2026-02-10',
+                end_date: '2026-02-15'
+            },
+            {
+                _id: 't7',
+                task_name: 'Migration Execution',
+                task_description: 'Execute database migration plan',
+                status: 'pending',
+                hours_consumed: 20,
+                user_assigned: 'Charlie DBA',
+                start_date: '2026-02-20',
+                end_date: '2026-03-31'
+            }
+        ],
+        '4': [
+            {
+                _id: 't8',
+                task_name: 'Payment API Integration',
+                task_description: 'Integrate Stripe payment API',
+                status: 'completed',
+                hours_consumed: 40,
+                user_assigned: 'David Backend Dev',
+                start_date: '2025-12-01',
+                end_date: '2026-01-15'
+            },
+            {
+                _id: 't9',
+                task_name: 'Analytics API Integration',
+                task_description: 'Integrate Google Analytics API',
+                status: 'completed',
+                hours_consumed: 40,
+                user_assigned: 'Eve Backend Dev',
+                start_date: '2026-01-10',
+                end_date: '2026-01-31'
+            }
+        ]
+    };
+
     useEffect(() => {
         fetchProjectDetails();
     }, [projectId]);
 
     const fetchProjectDetails = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Use mock data for development
+            const projectData = mockProjectsData[projectId];
+            const tasksData = mockTasksData[projectId] || [];
+
+            if (!projectData) {
+                throw new Error('Project not found');
+            }
+
+            setProject(projectData);
+            setTasks(tasksData);
+        } catch (err) {
+            setError(err.message || 'Failed to fetch project details');
+            console.error('Error fetching project details:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // For Backend
+    const fetchProjectDetailsAPI = async () => {
         try {
             setLoading(true);
             setError(null);

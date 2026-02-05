@@ -10,10 +10,52 @@ function HomeScreen() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchProjects();
+        // Mock data for development
+        const mockProjects = [
+            {
+                _id: '1',
+                project_name: 'Website Redesign',
+                project_description: 'Complete redesign of the company website with modern UI/UX',
+                status: 'in-progress',
+                hours_consumed: 120,
+                start_date: '2026-01-15',
+                end_date: '2026-03-15'
+            },
+            {
+                _id: '2',
+                project_name: 'Mobile App Development',
+                project_description: 'Development of iOS and Android mobile applications',
+                status: 'in-progress',
+                hours_consumed: 250,
+                start_date: '2026-01-01',
+                end_date: '2026-04-30'
+            },
+            {
+                _id: '3',
+                project_name: 'Database Migration',
+                project_description: 'Migration from legacy database to modern cloud-based solution',
+                status: 'pending',
+                hours_consumed: 40,
+                start_date: '2026-02-10',
+                end_date: '2026-03-31'
+            },
+            {
+                _id: '4',
+                project_name: 'API Integration',
+                project_description: 'Integrate third-party payment and analytics APIs',
+                status: 'completed',
+                hours_consumed: 80,
+                start_date: '2025-12-01',
+                end_date: '2026-01-31'
+            }
+        ];
+        
+        setProjects(mockProjects);
+        setLoading(false);
     }, []);
 
     const fetchProjects = async () => {
+        // API call for when backend is ready
         try {
             setLoading(true);
             setError(null);
@@ -23,11 +65,16 @@ function HomeScreen() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('API is not responding with JSON. Make sure the backend server is running.');
+            }
+            
             const data = await response.json();
             setProjects(data.projects || []);
         } catch (err) {
-            setError(err.message || 'Failed to fetch projects');
             console.error('Error fetching projects:', err);
+            setError(err.message || 'Failed to fetch projects. Is the backend API running?');
         } finally {
             setLoading(false);
         }
