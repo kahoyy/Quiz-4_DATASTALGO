@@ -49,3 +49,5 @@ src/
 
   
 Backend: https://github.com/marcjermynpraile/Quiz-4-Praile-And-Dimalanta-.git 
+
+Screenshots of the Screens: https://drive.google.com/drive/folders/13q66Ucm8VGoIJbSKiNlnbT_RK83Yoz2N?usp=drive_link
