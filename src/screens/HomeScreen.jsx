@@ -10,52 +10,13 @@ function HomeScreen() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Mock data for development
-        const mockProjects = [
-            {
-                _id: '1',
-                project_name: 'Website Redesign',
-                project_description: 'Complete redesign of the company website with modern UI/UX',
-                status: 'in-progress',
-                hours_consumed: 120,
-                start_date: '2026-01-15',
-                end_date: '2026-03-15'
-            },
-            {
-                _id: '2',
-                project_name: 'Mobile App Development',
-                project_description: 'Development of iOS and Android mobile applications',
-                status: 'in-progress',
-                hours_consumed: 250,
-                start_date: '2026-01-01',
-                end_date: '2026-04-30'
-            },
-            {
-                _id: '3',
-                project_name: 'Database Migration',
-                project_description: 'Migration from legacy database to modern cloud-based solution',
-                status: 'pending',
-                hours_consumed: 40,
-                start_date: '2026-02-10',
-                end_date: '2026-03-31'
-            },
-            {
-                _id: '4',
-                project_name: 'API Integration',
-                project_description: 'Integrate third-party payment and analytics APIs',
-                status: 'completed',
-                hours_consumed: 80,
-                start_date: '2025-12-01',
-                end_date: '2026-01-31'
-            }
-        ];
-        
-        setProjects(mockProjects);
+        // Start with no projects
+        setProjects([]);
         setLoading(false);
     }, []);
 
     const fetchProjects = async () => {
-        // API call for when backend is ready
+        // API call backend
         try {
             setLoading(true);
             setError(null);
@@ -115,10 +76,21 @@ function HomeScreen() {
 
     return (
         <div>
-            <h1 className="mb-4">Dashboard</h1>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h1>Dashboard</h1>
+                <Button 
+                    variant="success"
+                    onClick={() => navigate('/project/create')}
+                >
+                    + Create Project
+                </Button>
+            </div>
             
             {projects.length === 0 ? (
-                <Alert variant="info">No projects available.</Alert>
+                <Alert variant="info">
+                    <Alert.Heading>No Projects Yet</Alert.Heading>
+                    <p>No projects have been created. Click the "Create Project" button to get started.</p>
+                </Alert>
             ) : (
                 <Table striped bordered hover responsive>
                     <thead className="table-dark">
