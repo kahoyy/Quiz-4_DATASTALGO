@@ -10,8 +10,19 @@ function HomeScreen() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Start with no projects
-        setProjects([]);
+        // Load projects from localStorage
+        const savedProjects = localStorage.getItem('projects');
+        if (savedProjects) {
+            try {
+                const projects = JSON.parse(savedProjects);
+                setProjects(projects);
+            } catch (e) {
+                console.error('Error parsing projects:', e);
+                setProjects([]);
+            }
+        } else {
+            setProjects([]);
+        }
         setLoading(false);
     }, []);
 

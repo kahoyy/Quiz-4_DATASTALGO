@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Button, Card, Alert, Container, Row, Col } from 'react-bootstrap';
 
-function ProjectCreateScreen() {
+function TaskCreateScreen() {
     const navigate = useNavigate();
+    const { projectId } = useParams();
     const [formData, setFormData] = useState({
-        project_name: '',
-        project_description: '',
+        task_name: '',
+        task_description: '',
         user_assigned: '',
         start_date: '',
         end_date: ''
@@ -14,14 +15,58 @@ function ProjectCreateScreen() {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [projectName, setProjectName] = useState('');
 
-    // Mock managers list
-    const mockManagers = [
-        { _id: '101', name: 'Alice Johnson', email: 'alice@example.com' },
-        { _id: '102', name: 'Bob Smith', email: 'bob@example.com' },
-        { _id: '103', name: 'Charlie Davis', email: 'charlie@example.com' },
-        { _id: '104', name: 'Diana Wilson', email: 'diana@example.com' }
-    ];
+    // Mock users by role
+    const mockAllUsers = {
+        admins: [
+            { _id: '201', name: 'Admin User', email: 'admin@example.com', role: 'admin' }
+        ],
+        managers: [
+            { _id: '101', name: 'Alice Johnson', email: 'alice@example.com', role: 'manager' },
+            { _id: '102', name: 'Bob Smith', email: 'bob@example.com', role: 'manager' },
+            { _id: '103', name: 'Charlie Davis', email: 'charlie@example.com', role: 'manager' }
+        ],
+        users: [
+            { _id: '301', name: 'John Doe', email: 'john@example.com', role: 'user' },
+            { _id: '302', name: 'Sarah Connor', email: 'sarah@example.com', role: 'user' },
+            { _id: '303', name: 'Mike Johnson', email: 'mike@example.com', role: 'user' },
+            { _id: '304', name: 'Eve Wilson', email: 'eve@example.com', role: 'user' }
+        ]
+    };
+
+    // Mock projects data
+    const mockProjectsData = {
+        '1': { _id: '1', project_name: 'Website Redesign' },
+        '2': { _id: '2', project_name: 'Mobile App Development' },
+        '3': { _id: '3', project_name: 'Database Migration' },
+        '4': { _id: '4', project_name: 'API Integration' }
+    };
+
+    // Mock current user role (in real app, this would come from auth context)
+    const currentUserRole = 'admin'; // Can be 'admin' or 'manager'
+
+    useEffect(() => {
+        // Set project name
+        const project = mockProjectsData[projectId];
+        if (project) {
+            setProjectName(project.project_name);
+        }
+    }, [projectId]);
+
+    // Get available users based on current user's role
+    const getAvailableUsers = () => {
+        if (currentUserRole === 'admin') {
+            // Admin can assign to both managers and users
+            return [...mockAllUsers.managers, ...mockAllUsers.users];
+        } else if (currentUserRole === 'manager') {
+            // Manager can only assign to regular users
+            return mockAllUsers.users;
+        }
+        return [];
+    };
+
+    const availableUsers = getAvailableUsers();
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -37,13 +82,8 @@ function ProjectCreateScreen() {
         setSuccess(false);
 
         // Validation
-        if (!formData.project_name.trim()) {
-            setError('Project name is required');
-            return;
-        }
-
-        if (!formData.user_assigned) {
-            setError('Please assign a manager to this project');
+        if (!formData.task_name.trim()) {
+            setError('Task name is required');
             return;
         }
 
@@ -57,41 +97,24 @@ function ProjectCreateScreen() {
         try {
             setLoading(true);
 
-            // Create project object with generated ID
-            const projectId = Date.now().toString();
-            const selectedManager = mockManagers.find(m => m._id === formData.user_assigned);
-            const projectData = {
-                _id: projectId,
+            // For development, just show success message and redirect
+            const selectedUser = availableUsers.find(u => u._id === formData.user_assigned);
+            const taskData = {
+                project_id: projectId,
                 ...formData,
-                manager_assigned: selectedManager.name,
-                manager_id: selectedManager._id,
-                status: 'pending',
-                hours_consumed: 0,
+                user_assigned_name: selectedUser ? selectedUser.name : 'Unassigned',
                 created_at: new Date().toISOString()
             };
 
-            // Get existing projects from localStorage
-            const savedProjects = localStorage.getItem('projects');
-            let projects = [];
-            try {
-                projects = savedProjects ? JSON.parse(savedProjects) : [];
-            } catch (e) {
-                projects = [];
-            }
-
-            // Add new project
-            projects.push(projectData);
-            localStorage.setItem('projects', JSON.stringify(projects));
-
-            console.log('Project created:', projectData);
+            console.log('Task created:', taskData);
 
             setSuccess(true);
             setTimeout(() => {
-                navigate('/');
+                navigate(`/project/${projectId}`);
             }, 1500);
 
             /* For real API:
-            const response = await fetch('/api/v1/projects', {
+            const response = await fetch(`/api/v1/projects/${projectId}/tasks`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -100,17 +123,17 @@ function ProjectCreateScreen() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to create project');
+                throw new Error('Failed to create task');
             }
 
             setSuccess(true);
             setTimeout(() => {
-                navigate('/');
+                navigate(`/project/${projectId}`);
             }, 1500);
             */
         } catch (err) {
-            setError(err.message || 'Failed to create project');
-            console.error('Error creating project:', err);
+            setError(err.message || 'Failed to create task');
+            console.error('Error creating task:', err);
         } finally {
             setLoading(false);
         }
@@ -123,14 +146,17 @@ function ProjectCreateScreen() {
                     <Button 
                         variant="secondary" 
                         className="mb-4"
-                        onClick={() => navigate('/')}
+                        onClick={() => navigate(`/project/${projectId}`)}
                     >
-                        ← Back to Dashboard
+                        ← Back to Project
                     </Button>
 
                     <Card className="shadow-sm">
                         <Card.Header className="bg-primary text-white">
-                            <h2 className="mb-0">Create New Project</h2>
+                            <h2 className="mb-0">Create New Task</h2>
+                            {projectName && (
+                                <small className="text-light">For: {projectName}</small>
+                            )}
                         </Card.Header>
                         <Card.Body>
                             {error && (
@@ -141,62 +167,62 @@ function ProjectCreateScreen() {
 
                             {success && (
                                 <Alert variant="success">
-                                    Project created successfully! Redirecting to dashboard...
+                                    Task created successfully! Redirecting to project...
                                 </Alert>
                             )}
 
                             <Form onSubmit={handleSubmit}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>
-                                        Project Name <span className="text-danger">*</span>
+                                        Task Name <span className="text-danger">*</span>
                                     </Form.Label>
                                     <Form.Control
                                         type="text"
-                                        name="project_name"
-                                        placeholder="Enter project name"
-                                        value={formData.project_name}
+                                        name="task_name"
+                                        placeholder="Enter task name"
+                                        value={formData.task_name}
                                         onChange={handleInputChange}
                                         required
                                     />
                                     <Form.Text className="text-muted">
-                                        The name should be clear and descriptive
+                                        Provide a clear and descriptive task name
                                     </Form.Text>
                                 </Form.Group>
 
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Project Description</Form.Label>
+                                    <Form.Label>Task Description</Form.Label>
                                     <Form.Control
                                         as="textarea"
                                         rows={4}
-                                        name="project_description"
-                                        placeholder="Describe the project (optional)"
-                                        value={formData.project_description}
+                                        name="task_description"
+                                        placeholder="Describe the task (optional)"
+                                        value={formData.task_description}
                                         onChange={handleInputChange}
                                     />
                                     <Form.Text className="text-muted">
-                                        Provide details about the project goals and scope
+                                        Include requirements, acceptance criteria, etc.
                                     </Form.Text>
                                 </Form.Group>
 
                                 <Form.Group className="mb-3">
-                                    <Form.Label>
-                                        Assign Manager <span className="text-danger">*</span>
-                                    </Form.Label>
+                                    <Form.Label>Assign To</Form.Label>
                                     <Form.Select
                                         name="user_assigned"
                                         value={formData.user_assigned}
                                         onChange={handleInputChange}
-                                        required
                                     >
-                                        <option value="">-- Select a Manager --</option>
-                                        {mockManagers.map(manager => (
-                                            <option key={manager._id} value={manager._id}>
-                                                {manager.name} ({manager.email})
+                                        <option value="">-- Select a User (Optional) --</option>
+                                        {availableUsers.map(user => (
+                                            <option key={user._id} value={user._id}>
+                                                {user.name} ({user.email})
                                             </option>
                                         ))}
                                     </Form.Select>
                                     <Form.Text className="text-muted">
-                                        Only managers with Manager role are shown
+                                        {currentUserRole === 'admin' 
+                                            ? 'Showing managers and users'
+                                            : 'Showing users only'
+                                        }
                                     </Form.Text>
                                 </Form.Group>
 
@@ -226,11 +252,11 @@ function ProjectCreateScreen() {
                                         type="submit"
                                         disabled={loading}
                                     >
-                                        {loading ? 'Creating...' : 'Create Project'}
+                                        {loading ? 'Creating...' : 'Create Task'}
                                     </Button>
                                     <Button
                                         variant="outline-secondary"
-                                        onClick={() => navigate('/')}
+                                        onClick={() => navigate(`/project/${projectId}`)}
                                     >
                                         Cancel
                                     </Button>
@@ -244,4 +270,4 @@ function ProjectCreateScreen() {
     );
 }
 
-export default ProjectCreateScreen;
+export default TaskCreateScreen;

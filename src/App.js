@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import HomeScreen from "./screens/HomeScreen";
 import DetailScreen from "./screens/DetailScreen";
 import ProjectCreateScreen from "./screens/ProjectCreateScreen";
+import TaskCreateScreen from "./screens/TaskCreateScreen";
 import { Container } from "react-bootstrap";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
               <Route path="/" element={<HomeScreen />} />
               <Route path="/project/create" element={<ProjectCreateScreen />} />
               <Route path="/project/:projectId" element={<DetailScreen />} />
+              <Route path="/project/:projectId/task/create" element={<TaskCreateScreen />} />
             </Routes>
           </Container>
         </main>

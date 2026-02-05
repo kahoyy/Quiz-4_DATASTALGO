@@ -159,8 +159,23 @@ function DetailScreen() {
             setLoading(true);
             setError(null);
 
-            // Use mock data for development
-            const projectData = mockProjectsData[projectId];
+            // Check localStorage first for saved projects
+            let projectData = null;
+            const savedProjects = localStorage.getItem('projects');
+            if (savedProjects) {
+                try {
+                    const projects = JSON.parse(savedProjects);
+                    projectData = projects.find(p => p._id === projectId);
+                } catch (e) {
+                    console.error('Error parsing saved projects:', e);
+                }
+            }
+
+            // Fall back to mock data
+            if (!projectData) {
+                projectData = mockProjectsData[projectId];
+            }
+
             const tasksData = mockTasksData[projectId] || [];
 
             if (!projectData) {
@@ -333,14 +348,21 @@ function DetailScreen() {
             </Card>
 
             {/* Tasks Section */}
-            <Card className="shadow-sm">
-                <Card.Header className="bg-primary text-white">
+            <Card className="shadow-sm mt-4">
+                <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center">
                     <h3 className="mb-0">Tasks ({tasks.length})</h3>
+                    <Button 
+                        variant="light" 
+                        size="sm"
+                        onClick={() => navigate(`/project/${projectId}/task/create`)}
+                    >
+                        + Add Task
+                    </Button>
                 </Card.Header>
                 <Card.Body>
                     {tasks.length === 0 ? (
                         <Alert variant="info" className="mb-0">
-                            No tasks assigned to this project yet.
+                            No tasks assigned to this project yet. Click "Add Task" to create one.
                         </Alert>
                     ) : (
                         <div className="table-responsive">
