@@ -1,0 +1,141 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Table, Button, Spinner, Alert } from 'react-bootstrap';
+
+function HomeScreen() {
+    const [projects, setProjects] = useState([]);
+    const [expandedRows, setExpandedRows] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        fetchProjects();
+    }, []);
+
+    const fetchProjects = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await fetch('/api/v1/projects');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            setProjects(data.projects || []);
+        } catch (err) {
+            setError(err.message || 'Failed to fetch projects');
+            console.error('Error fetching projects:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleRow = (projectId) => {
+        setExpandedRows(prev => ({
+            ...prev,
+            [projectId]: !prev[projectId]
+        }));
+    };
+
+    const handleViewProject = (projectId) => {
+        navigate(`/project/${projectId}`);
+    };
+
+    if (loading) {
+        return (
+            <div className="text-center py-5">
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </Spinner>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <Alert variant="danger">
+                <Alert.Heading>Error Loading Projects</Alert.Heading>
+                <p>{error}</p>
+                <Button variant="primary" onClick={fetchProjects}>
+                    Retry
+                </Button>
+            </Alert>
+        );
+    }
+
+    return (
+        <div>
+            <h1 className="mb-4">Dashboard</h1>
+            
+            {projects.length === 0 ? (
+                <Alert variant="info">No projects available.</Alert>
+            ) : (
+                <Table striped bordered hover responsive>
+                    <thead className="table-dark">
+                        <tr>
+                            <th>Project Name</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {projects.map(project => (
+                            <React.Fragment key={project._id || project.id}>
+                                <tr>
+                                    <td>
+                                        <strong>{project.project_name}</strong>
+                                    </td>
+                                    <td>
+                                        <span className={`badge bg-${project.status === 'completed' ? 'success' : project.status === 'in-progress' ? 'primary' : 'warning'}`}>
+                                            {project.status || 'N/A'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <Button 
+                                            variant="sm" 
+                                            className="me-2"
+                                            onClick={() => toggleRow(project._id || project.id)}
+                                        >
+                                            {expandedRows[project._id || project.id] ? '▼ Hide' : '▶ Show'} Details
+                                        </Button>
+                                        <Button 
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() => handleViewProject(project._id || project.id)}
+                                        >
+                                            View Full
+                                        </Button>
+                                    </td>
+                                </tr>
+                                {expandedRows[project._id || project.id] && (
+                                    <tr className="table-light">
+                                        <td colSpan="3">
+                                            <div className="p-3">
+                                                <div className="row">
+                                                    <div className="col-md-6">
+                                                        <p><strong>Description:</strong> {project.project_description || 'N/A'}</p>
+                                                        <p><strong>Start Date:</strong> {project.start_date ? new Date(project.start_date).toLocaleDateString() : 'N/A'}</p>
+                                                        <p><strong>End Date:</strong> {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</p>
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <p><strong>Hours Consumed:</strong> {project.hours_consumed || 0} hrs</p>
+                                                        <p><strong>Status:</strong> {project.status || 'N/A'}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </tbody>
+                </Table>
+            )}
+        </div>
+    );
+}
+
+export default HomeScreen;
