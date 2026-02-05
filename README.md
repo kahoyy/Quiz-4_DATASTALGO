@@ -11,8 +11,15 @@ Task Tracking: Assign and manage deliverables with the dedicated TaskCreateScree
 
 User Administration: Full user lifecycle management through UserCreateScreen and a searchable UserListScreen.📱 Screen OverviewScreenPurposeHomeScreenThe landing page displaying high-level stats or recent activity.
 
-DetailScreenDeep-dive view for specific project or task information.ProjectCreateScreenForm interface for initializing new project entries.TaskCreateScreenInterface for defining tasks, deadlines, and assignments.
-UserCreateScreenAdministrative tool for adding new team members.UserListScreenA directory of all registered users with quick-action links.
+DetailScreenDeep-dive view for specific project or task information.
+
+ProjectCreateScreenForm interface for initializing new project entries.
+
+TaskCreateScreenInterface for defining tasks, deadlines, and assignments.
+
+UserCreateScreenAdministrative tool for adding new team members.
+
+UserListScreenA directory of all registered users with quick-action links.
 
 🛠️ Tech StackFrontend: [e.g., React Native / Flutter / React]State Management: [e.g., Redux / Context API / Riverpod]
 
